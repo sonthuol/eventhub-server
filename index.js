@@ -1,14 +1,27 @@
 const express = require("express");
 const cors = require("cors");
+const authRouter = require("./src/routers/authRouter");
+const connectDb = require("./src/configs/connectDb");
+const errorMiddleware = require("./src/middlewares/errorMiddleware");
+require("dotenv").config();
 
 const app = express();
-app.use(cors());
-
 const PORT = 3001;
 
-app.get("/auth/hello", (_req, res) => {
-  res.send("<h1>Hello, world!</h1>");
-});
+// Config cors
+app.use(cors());
+
+// Config express json
+app.use(express.json());
+
+// Router
+app.use("/auth", authRouter);
+
+// Connect to db mongodb
+connectDb();
+
+// Handle middleware
+app.use(errorMiddleware);
 
 app.listen(PORT, (err) => {
   if (err) {
