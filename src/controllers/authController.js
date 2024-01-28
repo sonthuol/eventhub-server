@@ -22,7 +22,7 @@ const register = asyncHandle(async (req, res) => {
   const isExistsUser = await UserModel.findOne({ email });
 
   if (isExistsUser) {
-    res.status(401);
+    res.status(400);
     throw new Error("User has already exist!!!");
   }
 
@@ -48,6 +48,34 @@ const register = asyncHandle(async (req, res) => {
   });
 });
 
+const login = asyncHandle(async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await UserModel.findOne({ email });
+
+  if (!user) {
+    res.status(403);
+    throw new Error("User not found !!!");
+  }
+
+  const isMatchPassword = await bcrypt.compare(password, user.password);
+
+  if (!isMatchPassword) {
+    res.status(401);
+    throw new Error("Email or password incorrect !!!");
+  }
+
+  res.status(200).json({
+    message: "Login successfully",
+    data: {
+      id: user.id,
+      email: user.email,
+      accesstoken: await getJsonWebToken(user.email, user.id),
+    },
+  });
+});
+
 module.exports = {
   register,
+  login,
 };
